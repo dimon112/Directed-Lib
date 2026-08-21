@@ -1,4 +1,4 @@
-package mymod.world.draw;
+package directedlib.world.draw;
 
 import arc.Core;
 import arc.graphics.g2d.Draw;
@@ -12,7 +12,7 @@ import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.world.Block;
 import mindustry.world.draw.DrawBlock;
-import mymod.world.blocks.DirectedCrafter;
+import directedlib.world.blocks.DirectedCrafter;
 
 public class DrawDirectedOutputs extends DrawBlock {
     public String arrowRegionName = "pointer";
