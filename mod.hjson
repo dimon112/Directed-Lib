@@ -3,7 +3,7 @@ displayName: "Directed-Lib"
 author: "Chmonya"
 main: "directedlib.DirectedLibMod"
 description: "A library and utility mod providing directional output crafters and custom drawers for Mindustry, [accent]suggested by oscillatorium[]"
-version: "0.6"
+version: "0.7"
 minGameVersion: 158
 java: true
 hidden: false

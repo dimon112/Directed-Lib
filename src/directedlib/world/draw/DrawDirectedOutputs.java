@@ -6,6 +6,7 @@ import arc.graphics.g2d.TextureRegion;
 import arc.math.geom.Geometry;
 import arc.struct.ObjectIntMap;
 import arc.struct.Seq;
+import arc.util.Nullable;
 import arc.util.Eachable;
 import mindustry.Vars;
 import mindustry.entities.units.BuildPlan;
@@ -27,7 +28,7 @@ public class DrawDirectedOutputs extends DrawBlock {
     }
 
     public String arrowRegionName = "pointer";
-    public TextureRegion arrowRegion;
+    public @Nullable TextureRegion arrowRegion;
 
     public float iconSize = 5f;
     public float arrowSize = 6f;
@@ -35,8 +36,7 @@ public class DrawDirectedOutputs extends DrawBlock {
     public boolean drawArrow = true;
     public boolean drawItem = true;
 
-    // Cache entry list to avoid iterator allocations during render
-    protected final Seq<OutputEntry> entries = new Seq<>(4);
+    protected final Seq<OutputEntry> entries = new Seq<>(OutputEntry.class);
 
     @Override
     public void load(Block block) {
@@ -57,11 +57,9 @@ public class DrawDirectedOutputs extends DrawBlock {
         if (!(build.block instanceof DirectedCrafter crafter) || entries.size == 0) return;
 
         float offset = (crafter.size * Vars.tilesize) / 2f - edgeInset;
-        OutputEntry[] items = entries.items;
-        int count = entries.size;
 
-        for (int i = 0; i < count; i++) {
-            OutputEntry entry = items[i];
+        for (int i = 0; i < entries.size; i++) {
+            OutputEntry entry = entries.get(i);
             int rot = (build.rotation + entry.relDir) % 4;
             float drawX = build.x + Geometry.d4x(rot) * offset;
             float drawY = build.y + Geometry.d4y(rot) * offset;
@@ -80,11 +78,9 @@ public class DrawDirectedOutputs extends DrawBlock {
         if (!(block instanceof DirectedCrafter crafter) || entries.size == 0) return;
 
         float offset = (crafter.size * Vars.tilesize) / 2f - edgeInset;
-        OutputEntry[] items = entries.items;
-        int count = entries.size;
 
-        for (int i = 0; i < count; i++) {
-            OutputEntry entry = items[i];
+        for (int i = 0; i < entries.size; i++) {
+            OutputEntry entry = entries.get(i);
             int rot = (plan.rotation + entry.relDir) % 4;
             float drawX = plan.drawx() + Geometry.d4x(rot) * offset;
             float drawY = plan.drawy() + Geometry.d4y(rot) * offset;
