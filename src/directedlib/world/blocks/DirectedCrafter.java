@@ -2,6 +2,7 @@ package directedlib.world.blocks;
 
 import arc.struct.ObjectIntMap;
 import arc.struct.Seq;
+import arc.util.Nullable;
 import mindustry.Vars;
 import mindustry.gen.Building;
 import mindustry.type.Item;
@@ -11,10 +12,7 @@ import mindustry.world.blocks.production.GenericCrafter;
 
 public class DirectedCrafter extends GenericCrafter {
     public ObjectIntMap<Item> itemOutputDirections = new ObjectIntMap<>();
-
-    public byte[] itemDirById;
-    public float[] sideOffsetsX = new float[4];
-    public float[] sideOffsetsY = new float[4];
+    public @Nullable byte[] itemDirById;
 
     public DirectedCrafter(String name) {
         super(name);
