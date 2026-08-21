@@ -1,4 +1,4 @@
-package mymod.world.blocks;
+package directedlib.world.blocks;
 
 import arc.Core;
 import arc.util.io.Reads;
@@ -44,9 +44,9 @@ public class DirectedTileCrafter extends DirectedCrafter {
         if (displayEfficiency) {
             addBar("efficiency", (DirectedTileCrafterBuild entity) ->
                 new Bar(
-                    () -> Core.bundle.format("bar.efficiency", (int) (entity.efficiencyMultiplier() * 100f * displayEfficiencyScale)),
+                    () -> Core.bundle.format("bar.efficiency", (int) (entity.efficiencyScale() * 100f * displayEfficiencyScale)),
                     () -> Pal.accent,
-                    () -> entity.efficiencyMultiplier()
+                    () -> entity.efficiencyScale()
                 )
             );
         }
@@ -55,14 +55,14 @@ public class DirectedTileCrafter extends DirectedCrafter {
     @Override
     public void setStats() {
         super.setStats();
-        stats.add(Stat.tiles, attribute, boostScale, baseEfficiency, minEfficiency <= 0);
+        stats.add(Stat.tiles, attribute, baseEfficiency <= 0f, boostScale, false);
     }
 
     public class DirectedTileCrafterBuild extends DirectedCrafterBuild {
         public float attrEfficiency = 1f;
 
         @Override
-        public float efficiencyMultiplier() {
+        public float efficiencyScale() {
             return attrEfficiency;
         }
 

@@ -1,4 +1,4 @@
-package mymod.world.blocks;
+package directedlib.world.blocks;
 
 import arc.struct.ObjectIntMap;
 import mindustry.gen.Building;
@@ -10,7 +10,6 @@ import mindustry.world.blocks.production.GenericCrafter;
 public class DirectedCrafter extends GenericCrafter {
     
       //0 = Front, 1 = Left, 2 = Back, 3 = Right blehh
-    
     public ObjectIntMap<Item> itemOutputDirections = new ObjectIntMap<>();
 
     public DirectedCrafter(String name) {
@@ -31,7 +30,7 @@ public class DirectedCrafter extends GenericCrafter {
                 int relDir = itemOutputDirections.get(todump, -1);
                 if (relDir >= 0) {
                     int targetDir = (rotation + relDir) % 4;
-                    int dumpOffset = dump;
+                    int dumpOffset = cdump;
 
                     for (int i = 0; i < proximity.size; i++) {
                         Building other = proximity.get((i + dumpOffset) % proximity.size);
@@ -52,7 +51,7 @@ public class DirectedCrafter extends GenericCrafter {
                     return false;
                 }
             }
-
+            
             return super.dump(todump);
         }
     }
