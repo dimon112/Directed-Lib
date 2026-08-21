@@ -35,6 +35,7 @@ public class DrawDirectedOutputs extends DrawBlock {
     public float edgeInset = 3f;
     public boolean drawArrow = true;
     public boolean drawItem = true;
+    public boolean drawWorld = false;
 
     protected final Seq<OutputEntry> entries = new Seq<>(OutputEntry.class);
 
@@ -54,7 +55,7 @@ public class DrawDirectedOutputs extends DrawBlock {
 
     @Override
     public void draw(Building build) {
-        if (!(build.block instanceof DirectedCrafter crafter) || entries.size == 0) return;
+        if (!drawWorld || !(build.block instanceof DirectedCrafter crafter) || entries.size == 0) return;
 
         float offset = (crafter.size * Vars.tilesize) / 2f - edgeInset;
 
