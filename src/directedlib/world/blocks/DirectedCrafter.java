@@ -9,6 +9,9 @@ import mindustry.type.Item;
 import mindustry.world.Edges;
 import mindustry.world.Tile;
 import mindustry.world.blocks.production.GenericCrafter;
+import mindustry.world.draw.DrawBlock;
+import mindustry.world.draw.DrawMulti;
+import directedlib.world.draw.DrawDirectedOutputs;
 
 public class DirectedCrafter extends GenericCrafter {
     public ObjectIntMap<Item> itemOutputDirections = new ObjectIntMap<>();
@@ -43,7 +46,7 @@ public class DirectedCrafter extends GenericCrafter {
 
         public DirectedCrafterBuild() {
             for (int i = 0; i < 4; i++) {
-                sideProximity[i] = new Seq<>(2);
+                sideProximity[i] = new Seq<>(Building.class);
             }
         }
 
@@ -95,6 +98,21 @@ public class DirectedCrafter extends GenericCrafter {
             }
 
             return super.dump(todump);
+        }
+
+        @Override
+        public void drawSelect() {
+            super.drawSelect();
+
+            if (drawer instanceof DrawMulti multi) {
+                for (DrawBlock d : multi.drawers) {
+                    if (d instanceof DrawDirectedOutputs directed) {
+                        directed.drawSelected(this);
+                    }
+                }
+            } else if (drawer instanceof DrawDirectedOutputs directed) {
+                directed.drawSelected(this);
+            }
         }
     }
 }
