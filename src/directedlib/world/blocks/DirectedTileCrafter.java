@@ -46,7 +46,7 @@ public class DirectedTileCrafter extends DirectedCrafter {
                 new Bar(
                     () -> Core.bundle.format("bar.efficiency", (int) (entity.efficiencyScale() * 100f * displayEfficiencyScale)),
                     () -> Pal.accent,
-                    () -> entity.efficiencyScale()
+                    entity::efficiencyScale
                 )
             );
         }

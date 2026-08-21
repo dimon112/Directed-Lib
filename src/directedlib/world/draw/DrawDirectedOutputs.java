@@ -5,6 +5,7 @@ import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.TextureRegion;
 import arc.math.geom.Geometry;
 import arc.struct.ObjectIntMap;
+import arc.struct.Seq;
 import arc.util.Eachable;
 import mindustry.Vars;
 import mindustry.entities.units.BuildPlan;
@@ -15,6 +16,16 @@ import mindustry.world.draw.DrawBlock;
 import directedlib.world.blocks.DirectedCrafter;
 
 public class DrawDirectedOutputs extends DrawBlock {
+    public static class OutputEntry {
+        public Item item;
+        public int relDir;
+
+        public OutputEntry(Item item, int relDir) {
+            this.item = item;
+            this.relDir = relDir;
+        }
+    }
+
     public String arrowRegionName = "pointer";
     public TextureRegion arrowRegion;
 
@@ -24,53 +35,65 @@ public class DrawDirectedOutputs extends DrawBlock {
     public boolean drawArrow = true;
     public boolean drawItem = true;
 
+    // Cache entry list to avoid iterator allocations during render
+    protected final Seq<OutputEntry> entries = new Seq<>(4);
+
     @Override
     public void load(Block block) {
         arrowRegion = Core.atlas.find(arrowRegionName, Core.atlas.find("pointer", Core.atlas.find("launch-arrow")));
+
+        entries.clear();
+        if (block instanceof DirectedCrafter crafter) {
+            for (ObjectIntMap.Entry<Item> entry : crafter.itemOutputDirections.entries()) {
+                if (entry.key != null && entry.value >= 0) {
+                    entries.add(new OutputEntry(entry.key, entry.value));
+                }
+            }
+        }
     }
 
     @Override
     public void draw(Building build) {
-        if (!(build.block instanceof DirectedCrafter crafter)) return;
+        if (!(build.block instanceof DirectedCrafter crafter) || entries.size == 0) return;
 
-        for (ObjectIntMap.Entry<Item> entry : crafter.itemOutputDirections.entries()) {
-            Item item = entry.key;
-            int relDir = entry.value;
-            if (item == null || relDir < 0) continue;
+        float offset = (crafter.size * Vars.tilesize) / 2f - edgeInset;
+        OutputEntry[] items = entries.items;
+        int count = entries.size;
 
-            int rot = (build.rotation + relDir) % 4;
-            float offset = (crafter.size * Vars.tilesize) / 2f - edgeInset;
+        for (int i = 0; i < count; i++) {
+            OutputEntry entry = items[i];
+            int rot = (build.rotation + entry.relDir) % 4;
             float drawX = build.x + Geometry.d4x(rot) * offset;
             float drawY = build.y + Geometry.d4y(rot) * offset;
 
             if (drawArrow && arrowRegion != null && arrowRegion.found()) {
                 Draw.rect(arrowRegion, drawX, drawY, arrowSize, arrowSize, rot * 90f);
             }
-            if (drawItem && item.uiIcon != null) {
-                Draw.rect(item.uiIcon, drawX, drawY, iconSize, iconSize);
+            if (drawItem && entry.item.uiIcon != null) {
+                Draw.rect(entry.item.uiIcon, drawX, drawY, iconSize, iconSize);
             }
         }
     }
 
     @Override
     public void drawPlan(Block block, BuildPlan plan, Eachable<BuildPlan> list) {
-        if (!(block instanceof DirectedCrafter crafter)) return;
+        if (!(block instanceof DirectedCrafter crafter) || entries.size == 0) return;
 
-        for (ObjectIntMap.Entry<Item> entry : crafter.itemOutputDirections.entries()) {
-            Item item = entry.key;
-            int relDir = entry.value;
-            if (item == null || relDir < 0) continue;
+        float offset = (crafter.size * Vars.tilesize) / 2f - edgeInset;
+        OutputEntry[] items = entries.items;
+        int count = entries.size;
 
-            int rot = (plan.rotation + relDir) % 4;
-            float offset = (crafter.size * Vars.tilesize) / 2f - edgeInset;
+        for (int i = 0; i < count; i++) {
+            OutputEntry entry = items[i];
+            int rot = (plan.rotation + entry.relDir) % 4;
             float drawX = plan.drawx() + Geometry.d4x(rot) * offset;
             float drawY = plan.drawy() + Geometry.d4y(rot) * offset;
 
             if (drawArrow && arrowRegion != null && arrowRegion.found()) {
                 Draw.rect(arrowRegion, drawX, drawY, arrowSize, arrowSize, rot * 90f);
             }
-            if (drawItem && item.uiIcon != null) {
-                Draw.rect(item.uiIcon, drawX, drawY, iconSize, iconSize);
+            if (drawItem && entry.item.uiIcon != null) {
+                Draw.rect(entry.item.uiIcon, drawX, drawY, iconSize, iconSize);
             }
         }
     }

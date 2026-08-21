@@ -1,6 +1,8 @@
 package directedlib.world.blocks;
 
 import arc.struct.ObjectIntMap;
+import arc.struct.Seq;
+import mindustry.Vars;
 import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.world.Edges;
@@ -8,9 +10,11 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.production.GenericCrafter;
 
 public class DirectedCrafter extends GenericCrafter {
-    
-      //0 = Front, 1 = Left, 2 = Back, 3 = Right blehh
     public ObjectIntMap<Item> itemOutputDirections = new ObjectIntMap<>();
+
+    public byte[] itemDirById;
+    public float[] sideOffsetsX = new float[4];
+    public float[] sideOffsetsY = new float[4];
 
     public DirectedCrafter(String name) {
         super(name);
@@ -18,40 +22,80 @@ public class DirectedCrafter extends GenericCrafter {
         quickRotate = true;
     }
 
+    @Override
+    public void init() {
+        super.init();
+
+        int maxId = Vars.content.items().size;
+        itemDirById = new byte[maxId];
+        for (int i = 0; i < maxId; i++) {
+            itemDirById[i] = -1;
+        }
+
+        for (ObjectIntMap.Entry<Item> entry : itemOutputDirections.entries()) {
+            if (entry.key != null) {
+                itemDirById[entry.key.id] = (byte) entry.value;
+            }
+        }
+    }
+
     public class DirectedCrafterBuild extends GenericCrafterBuild {
+        public final Seq<Building>[] sideProximity = new Seq[4];
+        public final byte[] sideCdump = new byte[4];
+
+        public DirectedCrafterBuild() {
+            for (int i = 0; i < 4; i++) {
+                sideProximity[i] = new Seq<>(2);
+            }
+        }
+
+        @Override
+        public void onProximityUpdate() {
+            super.onProximityUpdate();
+
+            for (int i = 0; i < 4; i++) {
+                sideProximity[i].clear();
+            }
+
+            for (int i = 0; i < proximity.size; i++) {
+                Building other = proximity.get(i);
+                Tile selfEdge = Edges.getFacingEdge(this, other);
+                Tile otherEdge = Edges.getFacingEdge(other, this);
+
+                if (selfEdge != null && otherEdge != null) {
+                    int dir = selfEdge.relativeTo(otherEdge);
+                    if (dir >= 0 && dir < 4) {
+                        sideProximity[dir].add(other);
+                    }
+                }
+            }
+        }
 
         @Override
         public boolean dump(Item todump) {
-            if (todump == null || !items.has(todump) || proximity.size == 0) {
+            if (todump == null || !items.has(todump)) return false;
+
+            int relDir = itemDirById != null && todump.id < itemDirById.length ? itemDirById[todump.id] : -1;
+
+            if (relDir >= 0) {
+                int targetDir = (rotation + relDir) % 4;
+                Seq<Building> targets = sideProximity[targetDir];
+                int size = targets.size;
+                if (size == 0) return false;
+
+                int offset = sideCdump[targetDir];
+                for (int i = 0; i < size; i++) {
+                    Building other = targets.get((i + offset) % size);
+                    if (other.team == team && other.acceptItem(this, todump)) {
+                        other.handleItem(this, todump);
+                        items.remove(todump, 1);
+                        sideCdump[targetDir] = (byte) ((offset + i + 1) % size);
+                        return true;
+                    }
+                }
                 return false;
             }
 
-            if (itemOutputDirections.containsKey(todump)) {
-                int relDir = itemOutputDirections.get(todump, -1);
-                if (relDir >= 0) {
-                    int targetDir = (rotation + relDir) % 4;
-                    int dumpOffset = cdump;
-
-                    for (int i = 0; i < proximity.size; i++) {
-                        Building other = proximity.get((i + dumpOffset) % proximity.size);
-                        Tile selfEdge = Edges.getFacingEdge(this, other);
-                        Tile otherEdge = Edges.getFacingEdge(other, this);
-
-                        // Match adjacent edge direction with target cardinal direction
-                        if (selfEdge != null && otherEdge != null && selfEdge.relativeTo(otherEdge) == targetDir) {
-                            if (other.team == team && other.acceptItem(this, todump)) {
-                                other.handleItem(this, todump);
-                                items.remove(todump, 1);
-                                incrementDump(proximity.size);
-                                return true;
-                            }
-                        }
-                        incrementDump(proximity.size);
-                    }
-                    return false;
-                }
-            }
-            
             return super.dump(todump);
         }
     }
