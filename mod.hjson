@@ -1,8 +1,8 @@
 name: "directed-lib"
-displayName: "Directed-Lib"
+displayName: "Выв lib"
 author: "Chmonya"
 main: "directedlib.DirectedLibMod"
-description: "A library and utility mod providing directional output crafters and custom drawers for Mindustry, [accent]suggested by oscillatorium[]"
+description: "A library and utility mod providing directional output crafters and custom drawers for Mindustry, [accent]suggested by Xelirit[]"
 version: "0.9"
 minGameVersion: 158
 java: true
